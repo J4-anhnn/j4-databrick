@@ -1,7 +1,7 @@
 import pandas as pd
 import time
 
-csv_path = "../../sales_data.csv"
+csv_path = "FileStore/tables/sales_data.csv"
 df = pd.read_csv(csv_path)
 
 # Đẩy data thành file con vào DBFS streaming
