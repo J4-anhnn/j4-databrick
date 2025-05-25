@@ -1,0 +1,10 @@
+bundles:
+  - name: j4-databrick-pipeline
+    pipelines:
+      - name: opportunity_streaming_pipeline
+        definition:
+          source: src/pipelines/dlt_pipeline.py
+        clusters:
+          - label: default
+            num_workers: 1
+        configuration: {}
