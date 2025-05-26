@@ -3,38 +3,40 @@ name: Deploy Databricks Asset Bundle
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
   deploy:
     name: Deploy to Databricks
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-      - name: Install Databricks CLI
+
+      - name: Install Databricks CLI v2
         run: |
-          python -m pip install --upgrade pip
-          pip install databricks-cli
+          pip install databricks-cli databricks-sdk
+
       - name: Configure Databricks CLI
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
           mkdir -p ~/.databricks
-          cat > ~/.databricks/credentials << EOF
-          [DEFAULT]
-          host = ${{ secrets.DATABRICKS_HOST }}
-          token = ${{ secrets.DATABRICKS_TOKEN }}
-          EOF
+          echo "[DEFAULT]" > ~/.databricks/credentials
+          echo "host = $DATABRICKS_HOST" >> ~/.databricks/credentials
+          echo "token = $DATABRICKS_TOKEN" >> ~/.databricks/credentials
           chmod 600 ~/.databricks/credentials
-      - name: Deploy to Dev
-        if: github.ref == 'refs/heads/develop'
-        run: |
-          databricks bundle deploy --target dev
+
       - name: Deploy to Production
-        if: github.ref == 'refs/heads/main'
+        working-directory: deployment
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
           databricks bundle deploy --target prod
