@@ -1,28 +1,35 @@
-# Databricks Asset Bundle Configuration
-bundles:
-  - name: j4-databrick-pipeline
-    # Pipeline definitions
-    pipelines:
-      # Streaming pipeline
-      - name: opportunity_streaming_pipeline
-        definition:
-          source: src/pipelines/dlt_pipeline_streaming.py
-        clusters:
-          - label: default
-            num_workers: 1
-            spark_conf:
-              "spark.databricks.delta.schema.autoMerge.enabled": "true"
-        configuration:
-          "pipelines.autoOptimize.managed": "true"
-          "pipelines.trigger.interval": "1 minute"
-      
-      # Batch pipeline
-      - name: opportunity_batch_pipeline
-        definition:
-          source: src/pipelines/dlt_pipeline_direct.py
-        clusters:
-          - label: default
-            num_workers: 1
-        configuration:
-          "pipelines.autoOptimize.managed": "true"
-          "pipelines.trigger.interval": "1 hour"
+bundle:
+  name: j4-databrick-pipeline
+
+targets:
+  prod:
+    mode: production
+    workspace:
+      host: https://adb-2633219487650475.15.azuredatabricks.net/
+      root_path: /Users/j4.anhnn@gmail.com/deployment
+
+resources:
+  pipelines:
+    opportunity_streaming_pipeline:
+      name: opportunity_streaming_pipeline
+      target: prod
+      definition_file: src/pipelines/dlt_pipeline_streaming.py
+      configuration:
+        pipelines.autoOptimize.managed: "true"
+        pipelines.trigger.interval: "1 minute"
+      clusters:
+        - label: default
+          num_workers: 1
+          spark_conf:
+            spark.databricks.delta.schema.autoMerge.enabled: "true"
+
+    opportunity_batch_pipeline:
+      name: opportunity_batch_pipeline
+      target: prod
+      definition_file: src/pipelines/dlt_pipeline_direct.py
+      configuration:
+        pipelines.autoOptimize.managed: "true"
+        pipelines.trigger.interval: "1 hour"
+      clusters:
+        - label: default
+          num_workers: 1
