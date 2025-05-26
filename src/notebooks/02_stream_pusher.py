@@ -5,7 +5,7 @@ import os
 # Constants
 CSV_PATH = "FileStore/tables/sales_data.csv"
 STREAM_DIR = "/dbfs/tmp/j4_databrick_streaming/"
-DELAY_SECONDS = 2  # Delay between pushing each row
+DELAY_SECONDS = 2  
 
 def ensure_directory_exists(directory_path):
     """Create directory if it doesn't exist"""
