@@ -3,8 +3,10 @@ from pyspark.sql.functions import col, when, to_date, udf, current_timestamp
 from pyspark.sql.types import StringType
 
 REVENUE_THRESHOLD = 100000
-SCHEMA_CHECKPOINT_PATH = "dbfs:/tmp/j4_schema_checkpoint"
-STREAMING_SOURCE_PATH = "dbfs:/tmp/j4_databrick_streaming/"
+# SCHEMA_CHECKPOINT_PATH = "dbfs:/tmp/j4_schema_checkpoint"
+SCHEMA_CHECKPOINT_PATH = dbutils.secrets.get(scope="j4-secrets", key="schema_checkpoint_path")
+# STREAMING_SOURCE_PATH = "dbfs:/tmp/j4_databrick_streaming/"
+STREAMING_SOURCE_PATH = dbutils.secrets.get(scope="j4-secrets", key="streaming_source_path")
 
 def mask_text(text):
     """Mask PII data by keeping first character and replacing rest with asterisks"""
