@@ -1,14 +1,43 @@
 import pandas as pd
 import time
+import os
 
-csv_path = "FileStore/tables/sales_data.csv"
-df = pd.read_csv(csv_path)
+# Constants
+CSV_PATH = "FileStore/tables/sales_data.csv"
+STREAM_DIR = "/dbfs/tmp/j4_databrick_streaming/"
+DELAY_SECONDS = 2  # Delay between pushing each row
 
-# Đẩy data thành file con vào DBFS streaming
-stream_dir = "/dbfs/tmp/j4_databrick_streaming/"
-dbutils.fs.mkdirs("/tmp/j4_databrick_streaming")
+def ensure_directory_exists(directory_path):
+    """Create directory if it doesn't exist"""
+    dbutils.fs.mkdirs(directory_path.replace("/dbfs", ""))
 
-for i, row in df.iterrows():
-    temp = row.to_frame().transpose()
-    temp.to_csv(stream_dir + f"part_{i}.csv", header=(i==0), index=False, mode='w')
-    time.sleep(2)  # mỗi 2s push 1 row, mô phỏng streaming thực
+def push_data_as_stream(df, output_dir, delay_seconds):
+    """Push data row by row with delay to simulate streaming"""
+    for i, row in df.iterrows():
+        temp = row.to_frame().transpose()
+        output_file = os.path.join(output_dir, f"part_{i}.csv")
+        
+        # Write with header only for first file
+        temp.to_csv(output_file, header=(i==0), index=False, mode='w')
+        
+        # Log progress
+        if i % 10 == 0:
+            print(f"Pushed {i} records to streaming directory")
+            
+        # Delay to simulate streaming
+        time.sleep(delay_seconds)
+
+def main():
+    # Read source data
+    df = pd.read_csv(CSV_PATH)
+    
+    # Ensure output directory exists
+    ensure_directory_exists(STREAM_DIR)
+    
+    # Push data as stream
+    print(f"Starting to push {len(df)} records to {STREAM_DIR}")
+    push_data_as_stream(df, STREAM_DIR, DELAY_SECONDS)
+    print("Streaming simulation complete")
+
+# Execute main function
+main()

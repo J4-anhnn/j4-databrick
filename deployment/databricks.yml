@@ -1,10 +1,28 @@
+# Databricks Asset Bundle Configuration
 bundles:
   - name: j4-databrick-pipeline
+    # Pipeline definitions
     pipelines:
+      # Streaming pipeline
       - name: opportunity_streaming_pipeline
         definition:
-          source: src/pipelines/dlt_pipeline.py
+          source: src/pipelines/dlt_pipeline_streaming.py
         clusters:
           - label: default
             num_workers: 1
-        configuration: {}
+            spark_conf:
+              "spark.databricks.delta.schema.autoMerge.enabled": "true"
+        configuration:
+          "pipelines.autoOptimize.managed": "true"
+          "pipelines.trigger.interval": "1 minute"
+      
+      # Batch pipeline
+      - name: opportunity_batch_pipeline
+        definition:
+          source: src/pipelines/dlt_pipeline_direct.py
+        clusters:
+          - label: default
+            num_workers: 1
+        configuration:
+          "pipelines.autoOptimize.managed": "true"
+          "pipelines.trigger.interval": "1 hour"

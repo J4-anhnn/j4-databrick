@@ -1,24 +1,43 @@
 from pyspark.sql.functions import col, when, to_date
 
-# Đường dẫn file
-csv_path = "dbfs:/FileStore/tables/sales_data-1.csv"  
+# Constants
+CSV_PATH = "dbfs:/FileStore/tables/sales_data-1.csv"
+TARGET_TABLE = "staging_opportunity_data"
 
-# Đọc file CSV
-df = spark.read.option("header", True).option("inferSchema", True).csv(csv_path)
+# Helper functions
+def convert_boolean_columns(df):
+    """Convert string boolean values to actual boolean type"""
+    boolean_columns = ["Closed_Opportunity", "Active_Opportunity", "Latest_Status_Entry"]
+    for column in boolean_columns:
+        df = df.withColumn(column, when(col(column) == "TRUE", True).otherwise(False))
+    return df
 
-# Chuyển đổi boolean
-for c in ["Closed_Opportunity", "Active_Opportunity", "Latest_Status_Entry"]:
-    df = df.withColumn(c, when(col(c) == "TRUE", True).otherwise(False))
+def convert_date_columns(df):
+    """Convert string dates to date type"""
+    date_columns = {
+        "Date": "M/d/yyyy",
+        "Target_Close": "M/d/yyyy"
+    }
+    for column, format in date_columns.items():
+        df = df.withColumn(column, to_date(col(column), format))
+    return df
 
-# Chuyển đổi date  
-df = df.withColumn("Date", to_date(col("Date"), "M/d/yyyy"))
-df = df.withColumn("Target_Close", to_date(col("Target_Close"), "M/d/yyyy"))
+def main():
+    # Read CSV file
+    df = spark.read.option("header", True).option("inferSchema", True).csv(CSV_PATH)
+    
+    # Transform data
+    df = convert_boolean_columns(df)
+    df = convert_date_columns(df)
+    
+    # Display sample for verification
+    df.show(5)
+    
+    # Save to staging table
+    df.write.format("delta").mode("overwrite").saveAsTable(TARGET_TABLE)
+    
+    # Verify table creation
+    display(spark.sql("SHOW TABLES"))
 
-# Hiển thị 5 dòng kiểm tra
-df.show(5)
-
-# Lưu bảng staging
-df.write.format("delta").mode("overwrite").saveAsTable("staging_opportunity_data")
-
-# Kiểm tra bảng đã tạo
-display(spark.sql("SHOW TABLES"))
+# Execute main function
+main()
