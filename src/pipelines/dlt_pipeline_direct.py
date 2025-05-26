@@ -2,11 +2,9 @@ import dlt
 from pyspark.sql.functions import col, when, to_date, udf
 from pyspark.sql.types import StringType
 
-# Constants
 CSV_PATH = "dbfs:/FileStore/tables/sales_data.csv"
 REVENUE_THRESHOLD = 100000
 
-# Helper functions
 def mask_text(text):
     """Mask PII data by keeping first character and replacing rest with asterisks"""
     return str(text)[0] + "***" if text else text
