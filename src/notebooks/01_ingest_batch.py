@@ -23,21 +23,15 @@ def convert_date_columns(df):
     return df
 
 def main():
-    # Read CSV file
     df = spark.read.option("header", True).option("inferSchema", True).csv(CSV_PATH)
     
-    # Transform data
     df = convert_boolean_columns(df)
     df = convert_date_columns(df)
     
-    # Display sample for verification
     df.show(5)
     
-    # Save to staging table
     df.write.format("delta").mode("overwrite").saveAsTable(TARGET_TABLE)
     
-    # Verify table creation
     display(spark.sql("SHOW TABLES"))
 
-# Execute main function
 main()
