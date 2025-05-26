@@ -13,7 +13,9 @@ resources:
     opportunity_streaming_pipeline:
       name: opportunity_streaming_pipeline
       target: prod
-      definition_file: src/pipelines/dlt_pipeline_streaming.py
+      python_file: src/pipelines/dlt_pipeline_streaming.py
+      libraries:
+        - file: src/pipelines/dlt_pipeline_streaming.py
       configuration:
         pipelines.autoOptimize.managed: "true"
         pipelines.trigger.interval: "1 minute"
@@ -26,10 +28,13 @@ resources:
     opportunity_batch_pipeline:
       name: opportunity_batch_pipeline
       target: prod
-      definition_file: src/pipelines/dlt_pipeline_direct.py
+      python_file: src/pipelines/dlt_pipeline_direct.py
+      libraries:
+        - file: src/pipelines/dlt_pipeline_direct.py
       configuration:
         pipelines.autoOptimize.managed: "true"
         pipelines.trigger.interval: "1 hour"
       clusters:
         - label: default
           num_workers: 1
+
