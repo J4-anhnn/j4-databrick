@@ -2,7 +2,6 @@ import pandas as pd
 import time
 import os
 
-# Constants
 CSV_PATH = "FileStore/tables/sales_data.csv"
 STREAM_DIR = "/dbfs/tmp/j4_databrick_streaming/"
 DELAY_SECONDS = 2  
